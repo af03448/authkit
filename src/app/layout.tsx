@@ -7,9 +7,19 @@ import BackLink from './back-link';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'AuthKit',
-  description: 'A collection of examples for AuthKit',
+  title: 'AuthKit - WorkOS Authentication',
+  description: 'Production-ready authentication microservice powered by WorkOS',
 };
+
+if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+  import('@/lib/startup').then(({ validateStartup, setupGracefulShutdown }) => {
+    validateStartup().catch((error) => {
+      console.error('Startup validation failed:', error);
+      process.exit(1);
+    });
+    setupGracefulShutdown();
+  });
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

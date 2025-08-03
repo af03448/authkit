@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run lint && npm run typecheck",
+    "start:production": "NODE_ENV=production next start",
+    "health-check": "curl -f http://localhost:3000/api/health || exit 1"
   },
   "dependencies": {
     "@workos-inc/authkit-nextjs": "0.4.2",
