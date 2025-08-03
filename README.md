@@ -1,66 +1,158 @@
+# AuthKit - Production-Ready Authentication
+
 <p align="center">
     <img src="https://github.com/workos/authkit/assets/896475/9fa7a91e-f5a8-4922-96fb-20a7b478d075" width="72" />
     <h1 align="center">AuthKit</h1>
-    <p align="center">How to use AuthKit's hosted UI or build your own frontend with the headless User Management APIs</p>    
+    <p align="center">Production-ready authentication microservice powered by WorkOS</p>    
     <p align="center"><a href="https://workos.com/docs/user-management">Explore the docs ↗</a></strong></p>    
 </p>
 
-<p align="center">  
-  <img alt="Screenshot of hosted UI AuthKit in light mode" src="https://github.com/workos/authkit/assets/108872335/200931ff-51fc-4825-894d-696dd17b88f6">
-</p>
+## 🚀 Quick Start
 
-## Examples
+This is a production-ready authentication microservice with clean, professional URLs and enterprise-grade security features.
 
-There are two ways to use AuthKit and this repository contains examples for both:
+### Authentication Flow
 
-- [Using AuthKit's hosted UI](./src/app/using-hosted-authkit)
-  This is the fastest way to add authentication to your app with AuthKit and WorkOS User Management. It includes a fully themeable hosted UI that handles all of your authentication flows. When you're ready to go to production you can point it to a custom domain (`auth.yourapp.com`) to match your application.
-- [Using your own custom UI](./src/app/using-your-own-ui)
-  Use all of the features of AuthKit, but build out the UI yourself in your own codebase by integrating directly with the headless WorkOS User Management APIs. Your authentication UI will be self-hosted in your application.
+- **`/`** - Landing page with sign-in
+- **`/auth/signin`** - Redirects to WorkOS hosted UI
+- **`/auth/callback`** - Handles OAuth return and creates session
+- **`/auth/signout`** - Clears session and signs out
+- **`/dashboard`** - Protected user dashboard
 
-## Prerequisites
+### API Endpoints
 
-You will need a [WorkOS account](https://dashboard.workos.com/signup).
+- **`/api/health`** - System health check
+- **`/api/metrics`** - Performance metrics (requires authentication)
 
-## Running the example
+## 🔧 Setup
 
-1. Install dependencies with `npm install` or `yarn install`
-2. Set up your **Environment variables** by signing into your [WorkOS dashboard](https://dashboard.workos.com), navigate to **API Keys** and copy the **Client ID** and the **Secret Key** (API Key).
-   Rename the `.env.local.example` file to `.env.local` and supply your _Client ID_ and _Secret Key_.
+### 1. Prerequisites
 
-   ```bash
-   WORKOS_CLIENT_ID="<your Client ID>"
-   WORKOS_API_KEY="<your Secret Key>"
-   ```
+- Node.js 18+
+- [WorkOS account](https://dashboard.workos.com/signup)
 
-3. Configure redirects in your [WorkOS dashboard](https://dashboard.workos.com), navigate to **Redirects** and add the following urls:
+### 2. Environment Configuration
 
-   ```bash
-   http://localhost:3000/using-your-own-ui/sign-in/google-oauth/callback
-   ```
+```bash
+# Copy environment template
+cp .env.example .env.local
 
-   ```bash
-   http://localhost:3000/using-your-own-ui/sign-in/microsoft-oauth/callback
-   ```
+# Generate JWT secret
+openssl rand -base64 32
+```
 
-   ```bash
-   http://localhost:3000/using-your-own-ui/sign-in/github-oauth/callback
-   ```
+Edit `.env.local` with your WorkOS credentials:
 
-   ```bash
-   http://localhost:3000/using-your-own-ui/sign-in/sso/callback
-   ```
+```bash
+WORKOS_CLIENT_ID=client_XXXXXXXXXX
+WORKOS_API_KEY=sk_XXXXXXXXXX
+JWT_SECRET_KEY=your_base64_encoded_secret_key_here
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
-   ```bash
-   http://localhost:3000/using-hosted-authkit/basic/callback
-   ```
+### 3. WorkOS Dashboard Setup
 
-   ```bash
-   http://localhost:3000/using-hosted-authkit/with-session/callback
-   ```
+1. Navigate to **Redirects** in your [WorkOS dashboard](https://dashboard.workos.com)
+2. Add callback URL: `http://localhost:3000/auth/callback`
 
-   ```bash
-   http://localhost:3000/using-hosted-authkit/with-nextjs/callback
-   ```
+### 4. Run the Application
 
-4. Run the example with `npm run dev` or `yarn dev` and navigate to http://localhost:3000
+```bash
+npm install
+npm run dev
+```
+
+Visit `http://localhost:3000` and click "Sign In" to test authentication!
+
+## 🌐 Production Deployment
+
+### Environment Variables
+
+```bash
+# Use production WorkOS credentials
+WORKOS_CLIENT_ID=client_prod_XXXXXXXXXX
+WORKOS_API_KEY=sk_prod_XXXXXXXXXX
+JWT_SECRET_KEY=your_base64_encoded_secret_key_here
+
+# Production configuration
+NODE_ENV=production
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+SECURE_HEADERS_ENABLED=true
+RATE_LIMIT_ENABLED=true
+```
+
+### Deploy
+
+```bash
+npm run build
+npm run start:production
+```
+
+### Register Production Callback
+
+In WorkOS dashboard, add: `https://your-domain.com/auth/callback`
+
+## 🔐 Security Features
+
+✅ **JWT Session Management** - Secure, stateless sessions  
+✅ **Rate Limiting** - Prevents abuse and brute force attacks  
+✅ **Security Headers** - HSTS, CSP, X-Frame-Options protection  
+✅ **Input Validation** - All inputs sanitized and validated  
+✅ **Error Handling** - Production-safe error messages  
+✅ **Audit Logging** - Comprehensive authentication logs  
+✅ **Environment Validation** - Startup configuration checks  
+✅ **Health Monitoring** - Built-in health check endpoints  
+
+## 📊 Monitoring
+
+- **Health Check**: `GET /api/health` - System status
+- **Metrics**: `GET /api/metrics` - Performance data (authenticated)
+- **Logs**: Structured logging with Winston
+- **Error Tracking**: Comprehensive error handling
+
+## 🛠️ Customization
+
+### Add Protected Routes
+
+Edit `src/middleware.ts`:
+
+```typescript
+export const config = {
+  matcher: [
+    '/dashboard/:path*',
+    '/admin/:path*',        // Add your protected routes
+    '/api/metrics',
+  ],
+};
+```
+
+### Custom Branding
+
+- Edit `src/app/page.tsx` for landing page
+- Edit `src/app/dashboard/page.tsx` for dashboard
+- All styled with Tailwind CSS
+
+## 📚 Documentation
+
+- **`SIMPLIFIED_PRODUCTION_GUIDE.md`** - Quick setup guide
+- **`PRODUCTION_GUIDE.md`** - Comprehensive deployment guide
+- **`CLEAN_PRODUCTION_SUMMARY.md`** - Feature overview
+
+## 🎯 Architecture
+
+Built with:
+- **Next.js 14** - React framework with App Router
+- **WorkOS** - Enterprise authentication platform
+- **TypeScript** - Type safety throughout
+- **Tailwind CSS** - Utility-first styling
+- **Winston** - Production logging
+- **Zod** - Runtime validation
+
+## 🚨 Support
+
+- **WorkOS Issues**: [WorkOS Support](https://workos.com/support)
+- **Application Issues**: Check logs and health endpoints
+
+---
+
+🎉 **Your authentication microservice is production-ready!**
