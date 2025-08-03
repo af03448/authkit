@@ -10,9 +10,15 @@ export default async function middleware(request: NextRequest) {
     return rateLimitResponse;
   }
 
-  const response = await authkitMiddleware({ 
+  const authkitHandler = authkitMiddleware({ 
     debug: process.env.NODE_ENV !== 'production' 
-  })(request);
+  });
+  
+  const response = await authkitHandler(request);
+  
+  if (!response) {
+    return NextResponse.next();
+  }
 
   if (AUTH_CONSTANTS.SECURITY.HEADERS_ENABLED) {
     response.headers.set('X-Frame-Options', 'DENY');

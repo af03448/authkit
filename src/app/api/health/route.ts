@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
   if (workos) {
     try {
-      const organizationMemberships = await workos.organizationMemberships.listOrganizationMemberships({
+      const users = await workos.userManagement.listUsers({
         limit: 1,
       });
       response.checks.workos = true;

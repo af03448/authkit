@@ -9,7 +9,7 @@ export default function SignInWithEmailPassword() {
   // If your application is a single page app (SPA), you will need to:
   // - handle the form submission in `<form onSubmit>`
   // - make an API call to your backend (e.g using `fetch`)
-  const [signInState, signInAction] = useFormState(signIn, { error: null });
+  const [signInState, signInAction] = useFormState(signIn, { error: '' });
 
   return (
     <main>

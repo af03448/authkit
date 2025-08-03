@@ -14,7 +14,7 @@ export async function validateStartup(): Promise<void> {
     const workos = new WorkOS(process.env.WORKOS_API_KEY!);
     
     try {
-      await workos.organizationMemberships.listOrganizationMemberships({ limit: 1 });
+      await workos.userManagement.listUsers({ limit: 1 });
       logInfo('WorkOS connection successful');
     } catch (error) {
       logError(error, { context: 'WorkOS connection test' });
