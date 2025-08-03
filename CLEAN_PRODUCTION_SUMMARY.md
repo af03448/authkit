@@ -18,17 +18,14 @@ Your AuthKit is now **production-ready** with **clean, professional URLs**:
 
 ### 🔥 Key Improvements Made
 
-**From this** (example/demo URLs):
+**Clean, professional URLs** for production:
 ```
-/using-hosted-authkit/with-session/callback
-/using-your-own-ui/sign-in/email-password
+/auth/callback  ............ Handle OAuth returns
+/auth/signin  .............. Initiate authentication
+/dashboard  ................ Protected user dashboard
 ```
 
-**To this** (clean production URLs):
-```
-/auth/callback
-/auth/signin
-```
+All example routes have been removed to prevent confusion.
 
 ## 🏗️ Architecture Overview
 
