@@ -4,15 +4,15 @@ import { rateLimitMiddleware } from './lib/rate-limit';
 import { AUTH_CONSTANTS } from './lib/constants';
 import { logDebug } from './lib/logger';
 
+const authkitHandler = authkitMiddleware({ 
+  debug: process.env.NODE_ENV !== 'production' 
+});
+
 export default async function middleware(request: NextRequest) {
   const rateLimitResponse = rateLimitMiddleware(request);
   if (rateLimitResponse) {
     return rateLimitResponse;
   }
-
-  const authkitHandler = authkitMiddleware({ 
-    debug: process.env.NODE_ENV !== 'production' 
-  });
   
   const response = await authkitHandler(request);
   
