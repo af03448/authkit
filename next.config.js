@@ -4,7 +4,7 @@ const nextConfig = {
   reactStrictMode: true,
   
   async headers() {
-    return [
+    const baseHeaders = [
       {
         source: '/:path*',
         headers: [
@@ -44,6 +44,20 @@ const nextConfig = {
         ]
       }
     ];
+
+    // Add production-specific headers
+    if (process.env.NODE_ENV === 'production') {
+      baseHeaders[0].headers.push({
+        key: 'Strict-Transport-Security',
+        value: 'max-age=31536000; includeSubDomains; preload'
+      });
+      baseHeaders[0].headers.push({
+        key: 'Content-Security-Policy',
+        value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.workos.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://api.workos.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+      });
+    }
+
+    return baseHeaders;
   },
 
   async rewrites() {
@@ -64,20 +78,5 @@ const nextConfig = {
     },
   },
 };
-
-if (process.env.NODE_ENV === 'production') {
-  nextConfig.headers = async () => {
-    const headers = await nextConfig.headers();
-    headers[0].headers.push({
-      key: 'Strict-Transport-Security',
-      value: 'max-age=31536000; includeSubDomains; preload'
-    });
-    headers[0].headers.push({
-      key: 'Content-Security-Policy',
-      value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.workos.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://api.workos.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
-    });
-    return headers;
-  };
-}
 
 module.exports = nextConfig;
