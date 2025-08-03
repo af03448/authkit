@@ -5,8 +5,7 @@ export default authkitMiddleware({ debug: process.env.NODE_ENV !== 'production' 
 
 export const config = {
   matcher: [
-    '/api/:path*',
-    '/using-hosted-authkit/with-nextjs',
-    '/using-your-own-ui/((?!public).*)',
+    '/dashboard/:path*',
+    '/api/metrics',
   ],
 };

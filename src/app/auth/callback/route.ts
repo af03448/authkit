@@ -17,24 +17,27 @@ export async function GET(request: NextRequest) {
     const error = searchParams.get('error');
     const errorDescription = searchParams.get('error_description');
 
+    // Handle OAuth errors
     if (error) {
       logInfo('OAuth error received', { error, errorDescription });
       return NextResponse.redirect(
-        new URL(`/error?message=${encodeURIComponent(errorDescription || error)}`, request.url)
+        new URL(`/auth/error?message=${encodeURIComponent(errorDescription || error)}`, request.url)
       );
     }
 
+    // Validate authorization code
     if (!code) {
       return handleError(new Error('Authorization code is missing'));
     }
 
+    // Authenticate with WorkOS
     const { user } = await workos.userManagement.authenticateWithCode({
       clientId: env.WORKOS_CLIENT_ID,
       code,
     });
 
+    // Create JWT session
     const token = await createJwtToken(user);
-    
     setAuthCookie(token);
     
     logInfo('User authenticated successfully', { 
@@ -42,7 +45,8 @@ export async function GET(request: NextRequest) {
       email: user.email 
     });
 
-    let redirectUrl = '/using-hosted-authkit/with-session';
+    // Determine redirect URL
+    let redirectUrl = '/dashboard';
     
     if (state) {
       try {
@@ -51,13 +55,11 @@ export async function GET(request: NextRequest) {
           redirectUrl = stateData.returnTo;
         }
       } catch {
-        logInfo('Invalid state parameter');
+        logInfo('Invalid state parameter, using default redirect');
       }
     }
 
-    const response = NextResponse.redirect(new URL(redirectUrl, request.url));
-    
-    return response;
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
   } catch (error) {
     if (isWorkOSError(error)) {
       return handleWorkOSError(error);
