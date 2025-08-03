@@ -10,7 +10,8 @@ export const metadata: Metadata = {
   description: 'Production-ready authentication microservice powered by WorkOS',
 };
 
-if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+// Only run startup validation at runtime, not during build
+if (process.env.NODE_ENV === 'production' && typeof window === 'undefined' && process.env.NEXT_PHASE !== 'phase-production-build') {
   import('@/lib/startup').then(({ validateStartup, setupGracefulShutdown }) => {
     validateStartup().catch((error) => {
       console.error('Startup validation failed:', error);
