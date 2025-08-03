@@ -3,15 +3,6 @@ import { WorkOS } from '@workos-inc/node';
 import { getEnv } from '@/lib/env';
 import { logInfo, logError } from '@/lib/logger';
 
-let workos: WorkOS | null = null;
-
-try {
-  const env = getEnv();
-  workos = new WorkOS(env.WORKOS_API_KEY);
-} catch (error) {
-  logError(error, { context: 'Health check initialization' });
-}
-
 interface HealthCheckResponse {
   status: 'healthy' | 'unhealthy' | 'degraded';
   timestamp: string;
@@ -41,23 +32,16 @@ export async function GET(request: NextRequest) {
   try {
     const env = getEnv();
     response.checks.environment = true;
+    
+    // Test WorkOS connectivity
+    const workos = new WorkOS(env.WORKOS_API_KEY);
+    const users = await workos.userManagement.listUsers({
+      limit: 1,
+    });
+    response.checks.workos = true;
   } catch (error) {
     response.status = 'unhealthy';
-    logError(error, { context: 'Health check - environment validation' });
-  }
-
-  if (workos) {
-    try {
-      const users = await workos.userManagement.listUsers({
-        limit: 1,
-      });
-      response.checks.workos = true;
-    } catch (error) {
-      response.status = response.status === 'unhealthy' ? 'unhealthy' : 'degraded';
-      logError(error, { context: 'Health check - WorkOS connectivity' });
-    }
-  } else {
-    response.status = 'unhealthy';
+    logError(error, { context: 'Health check - environment or WorkOS' });
   }
 
   const responseTime = Date.now() - startTime;

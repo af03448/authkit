@@ -6,10 +6,9 @@ import { handleError, handleWorkOSError, isWorkOSError } from '@/lib/errors';
 import { logInfo } from '@/lib/logger';
 import { isValidRedirectUrl } from '@/lib/validation';
 
-const env = getEnv();
-const workos = new WorkOS(env.WORKOS_API_KEY);
-
 export async function GET(request: NextRequest) {
+  const env = getEnv();
+  const workos = new WorkOS(env.WORKOS_API_KEY);
   try {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');

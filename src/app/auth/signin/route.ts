@@ -3,10 +3,9 @@ import { WorkOS } from '@workos-inc/node';
 import { getEnv } from '@/lib/env';
 import { logInfo } from '@/lib/logger';
 
-const env = getEnv();
-const workos = new WorkOS(env.WORKOS_API_KEY);
-
 export async function GET(request: NextRequest) {
+  const env = getEnv();
+  const workos = new WorkOS(env.WORKOS_API_KEY);
   const returnPathname = request.nextUrl.searchParams.get('returnTo') || '/dashboard';
   
   const authorizationUrl = workos.userManagement.getAuthorizationUrl({
