@@ -146,7 +146,8 @@ Your AuthKit microservice is now:
 - ✅ **Type-safe** with comprehensive TypeScript
 - ✅ **Well-documented** with setup guides
 - ✅ **Maintainable** with clean, modular code
+- ✅ **No confusion** - all example routes removed
 
-The old example routes still exist but aren't used in production. Your clean `/auth/*` routes are the main authentication flow now!
+Your clean `/auth/*` routes are the only authentication flow!
 
 🚀 **Ready to ship!**
