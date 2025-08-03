@@ -1,52 +1,67 @@
 import { WorkOS } from '@workos-inc/node';
-import { NextResponse } from 'next/server';
-import { SignJWT } from 'jose';
-import { getJwtSecretKey } from '../auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { getEnv } from '@/lib/env';
+import { createJwtToken, setAuthCookie } from '@/lib/auth';
+import { handleError, handleWorkOSError, isWorkOSError } from '@/lib/errors';
+import { logInfo } from '@/lib/logger';
+import { isValidRedirectUrl } from '@/lib/validation';
 
-// This is a Next.js Route Handler.
-//
-// If your application is a single page app (SPA) with a separate backend you will need to:
-// - create a backend endpoint to handle the request
-// - adapt the code below in your endpoint
+const env = getEnv();
+const workos = new WorkOS(env.WORKOS_API_KEY);
 
-const workos = new WorkOS(process.env.WORKOS_API_KEY);
-
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const code = url.searchParams.get('code') || '';
-
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
+    const error = searchParams.get('error');
+    const errorDescription = searchParams.get('error_description');
+
+    if (error) {
+      logInfo('OAuth error received', { error, errorDescription });
+      return NextResponse.redirect(
+        new URL(`/error?message=${encodeURIComponent(errorDescription || error)}`, request.url)
+      );
+    }
+
+    if (!code) {
+      return handleError(new Error('Authorization code is missing'));
+    }
+
     const { user } = await workos.userManagement.authenticateWithCode({
-      clientId: process.env.WORKOS_CLIENT_ID || '',
+      clientId: env.WORKOS_CLIENT_ID,
       code,
     });
 
-    // Create a JWT with the user's information
-    // Here you might lookup and retrieve user details from your database
-    const token = await new SignJWT({ user })
-      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-      .setIssuedAt()
-      .setExpirationTime('1h')
-      .sign(getJwtSecretKey());
-
-    // Cleanup params
-    url.searchParams.delete('code');
-
-    // Store the session and redirect to the application
-    url.pathname = '/using-hosted-authkit/with-session';
-    const response = NextResponse.redirect(url);
-
-    response.cookies.set({
-      name: 'token',
-      value: token,
-      httpOnly: true,
-      path: '/',
-      secure: true,
-      sameSite: 'lax',
+    const token = await createJwtToken(user);
+    
+    setAuthCookie(token);
+    
+    logInfo('User authenticated successfully', { 
+      userId: user.id, 
+      email: user.email 
     });
 
+    let redirectUrl = '/using-hosted-authkit/with-session';
+    
+    if (state) {
+      try {
+        const stateData = JSON.parse(Buffer.from(state, 'base64').toString());
+        if (stateData.returnTo && isValidRedirectUrl(stateData.returnTo, [request.headers.get('host') || ''])) {
+          redirectUrl = stateData.returnTo;
+        }
+      } catch {
+        logInfo('Invalid state parameter');
+      }
+    }
+
+    const response = NextResponse.redirect(new URL(redirectUrl, request.url));
+    
     return response;
   } catch (error) {
-    return NextResponse.json(error);
+    if (isWorkOSError(error)) {
+      return handleWorkOSError(error);
+    }
+    return handleError(error, { endpoint: 'auth_callback' });
   }
 }
