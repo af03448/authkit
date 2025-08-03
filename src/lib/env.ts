@@ -39,6 +39,11 @@ export type Env = z.infer<typeof envSchema>;
 let env: Env | undefined;
 
 export function getEnv(): Env {
+  // Skip validation during build time
+  if (process.env.NODE_ENV === undefined || process.env.NEXT_PHASE === 'phase-production-build') {
+    return process.env as any;
+  }
+
   if (!env) {
     const parsed = envSchema.safeParse(process.env);
     
