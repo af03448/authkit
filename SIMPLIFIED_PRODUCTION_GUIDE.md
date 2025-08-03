@@ -133,9 +133,9 @@ export const config = {
 
 ## 🚨 Important Notes
 
-- The original example routes (`/using-hosted-authkit/`, `/using-your-own-ui/`) are still there but not used in production
-- Only register `/auth/callback` in WorkOS dashboard - not the example URLs
+- Only register `/auth/callback` in WorkOS dashboard
 - The middleware only protects `/dashboard` and `/api/metrics` by default
-- All authentication now flows through the clean `/auth/*` routes
+- All authentication flows through the clean `/auth/*` routes
+- The codebase is now clean with no unused example routes
 
 Your authentication microservice is now production-ready with clean URLs! 🎉
